@@ -1,0 +1,169 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<style>
+    .result-icon-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px auto;
+    }
+    .result-icon-circle--safe {
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid var(--success);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+    }
+    .result-icon-circle--risk {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid var(--danger);
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+        animation: madi-pulse-risk 2s infinite;
+    }
+    @keyframes madi-pulse-risk {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+</style>
+
+<div class="container" style="padding-top: 50px; padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="glass-panel text-center madi-animate">
+                
+                <h2 style="color: var(--text-main); margin-bottom: 30px;">{{ display_name }} Analysis Results</h2>
+                
+                <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 40px 20px; margin-bottom: 30px; position: relative; overflow: hidden;">
+                    <!-- Confidence Badge -->
+                    {% if confidence %}
+                    <div style="position: absolute; top: 15px; right: 15px; background: rgba(0, 212, 255, 0.1); border: 1px solid var(--accent-primary); color: var(--accent-primary); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
+                        <span data-countup="{{ confidence }}" data-suffix="%">0%</span> Confidence
+                    </div>
+                    {% endif %}
+
+                    {% if prediction == 0 %}
+                        <div class="result-icon-circle result-icon-circle--safe">
+                            <i class="fa fa-check" style="font-size: 50px; color: var(--success);"></i>
+                        </div>
+                        <h3 style="color: var(--success); margin-bottom: 15px;">No Significant Risk Detected</h3>
+                        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 80%; margin: 0 auto;">
+                            The model analysis indicates no strong signs of {{ display_name }}. Continue to maintain a healthy lifestyle and attend regular check-ups.
+                        </p>
+                    {% else %}
+                        <div class="result-icon-circle result-icon-circle--risk">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 50px; color: var(--danger);"></i>
+                        </div>
+                        <h3 style="color: var(--danger); margin-bottom: 15px;">Potential Risk Detected</h3>
+                        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 80%; margin: 0 auto;">
+                            The model analysis has identified patterns consistent with {{ display_name }} risk. We strongly recommend consulting a healthcare professional for further evaluation.
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Input Parameters Summary -->
+                <div class="text-left" style="margin-bottom: 30px;">
+                    <h4 style="color: var(--accent-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Provided Parameters</h4>
+                    <div class="row">
+                        {% for key, val in input_data.items() %}
+                        <div class="col-xs-6 col-sm-4" style="margin-bottom: 10px;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem; display: block;">{{ key|replace('_', ' ')|title }}</span>
+                            <span style="color: var(--text-main); font-weight: 600;">{{ val }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row" style="margin-top: 40px;">
+                    <div class="col-sm-4" style="margin-bottom: 10px;">
+                        <a href="{{ url_for('views.home') }}" class="btn btn-madi-outline btn-block">Back Home</a>
+                    </div>
+                    <div class="col-sm-4" style="margin-bottom: 10px;">
+                        <a href="{{ url_for('views.dashboard') }}" class="btn btn-madi-outline btn-block" style="border-color: var(--success); color: var(--success);">
+                            <i class="fa fa-pie-chart" style="margin-right: 5px;"></i> View Dashboard
+                        </a>
+                    </div>
+                    <div class="col-sm-4" style="margin-bottom: 10px;">
+                        {% if llm_available %}
+                            <button id="interpretBtn" class="btn btn-madi btn-block">
+                                <i class="fa fa-comment-o" style="margin-right: 5px;"></i> Get AI Interpretation
+                            </button>
+                        {% else %}
+                            <button class="btn btn-madi btn-block" disabled title="LLM not configured">
+                                <i class="fa fa-comment-o" style="margin-right: 5px;"></i> AI Unavailable
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- AI Interpretation Container (Hidden initially) -->
+                <div id="aiContainer" style="display: none; margin-top: 30px; text-align: left; background: rgba(0, 212, 255, 0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                    <h4 style="color: var(--accent-primary);"><i class="fa fa-magic"></i> AI Diagnostic Assistant</h4>
+                    <div id="aiLoading" class="text-center" style="padding: 20px;">
+                        <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--accent-primary);"></i>
+                        <p style="margin-top: 10px; color: var(--text-muted);">Generating patient-friendly interpretation...</p>
+                    </div>
+                    <div id="aiContent" class="chat-ai" style="display: none; background: transparent; border: none; padding: 0;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if llm_available %}
+<script>
+document.getElementById('interpretBtn').addEventListener('click', function() {
+    // Show container and loading
+    document.getElementById('aiContainer').style.display = 'block';
+    document.getElementById('aiLoading').style.display = 'block';
+    document.getElementById('aiContent').style.display = 'none';
+    this.disabled = true;
+
+    // Collect data
+    const payload = {
+        disease: "{{ page }}",
+        prediction: {{ prediction }},
+        confidence: {{ confidence if confidence else 'null' }},
+        display_name: {{ display_name|tojson|safe }},
+        input_data: {{ input_data|tojson|safe }}
+    };
+
+    // Make API call
+    fetch("{{ url_for('prediction.api_interpret') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('aiLoading').style.display = 'none';
+        const contentDiv = document.getElementById('aiContent');
+        
+        // Simple markdown parsing for bold and bullet points
+        let formattedText = data.interpretation
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--accent-primary);">$1</strong>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n- /g, '<br>• ');
+            
+        contentDiv.innerHTML = formattedText;
+        contentDiv.style.display = 'block';
+        document.getElementById('interpretBtn').disabled = false;
+    })
+    .catch(error => {
+        document.getElementById('aiLoading').style.display = 'none';
+        document.getElementById('aiContent').innerHTML = '<p style="color: var(--danger);">Error generating interpretation. Please try again.</p>';
+        document.getElementById('aiContent').style.display = 'block';
+        document.getElementById('interpretBtn').disabled = false;
+        console.error('Error:', error);
+    });
+});
+</script>
+{% endif %}
+
+{% endblock %}

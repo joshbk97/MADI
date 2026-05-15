@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="section-padding" style="min-height: 80vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                <div class="glass-panel text-center madi-animate">
+                    <h2 style="margin-bottom: 30px; color: var(--accent-secondary);">Create Account</h2>
+                    
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        <div class="form-group text-left">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter your email" required autofocus>
+                        </div>
+                        
+                        <div class="form-group text-left">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+                        </div>
+                        
+                        <div class="form-group text-left">
+                            <label class="form-label">Password</label>
+                            <div class="madi-password-wrapper">
+                                <input type="password" name="password1" class="form-control" placeholder="Create a password" required>
+                                <button type="button" class="madi-password-toggle" aria-label="Toggle password visibility">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group text-left">
+                            <label class="form-label">Confirm Password</label>
+                            <div class="madi-password-wrapper">
+                                <input type="password" name="password2" class="form-control" placeholder="Confirm your password" required>
+                                <button type="button" class="madi-password-toggle" aria-label="Toggle password visibility">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <br>
+                        <button type="submit" class="btn btn-madi btn-block" style="width: 100%;">Register</button>
+                    </form>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                        <p style="color: var(--text-muted); font-size: 14px;">
+                            Already have an account? <a href="{{ url_for('auth.login') }}" style="color: var(--accent-secondary);">Login here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

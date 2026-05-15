@@ -1,0 +1,133 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<div class="container disease-header text-center madi-animate">
+    <h2 style="color: var(--accent-primary); font-size: 2.5rem;">Kidney Disease Prediction</h2>
+    <p style="color: var(--text-muted);">Please provide the following clinical parameters to run the diagnostic model.</p>
+</div>
+
+<div class="container" style="padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="glass-panel madi-animate" data-delay="150">
+                <div class="madi-form-progress-text" id="formProgressText">0% Complete</div>
+                <div class="madi-form-progress"><div class="madi-form-progress-bar" id="formProgressBar"></div></div>
+                <form action="{{ url_for('prediction.predict') }}" method="POST">
+                    <input type="hidden" name="madi_model" value="kidney">
+                    <div class="row">
+                        <!-- Column 1 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age</label>
+                                <input class="form-control" type="number" min="0" required name="age" placeholder="e.g. 45">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="blood_pressure" class="form-label">Blood Pressure (mm/Hg)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="blood_pressure" required placeholder="e.g. 80">
+                            </div>
+                              
+                            <div class="form-group">
+                                <label for="Specific_Gravity" class="form-label">Specific Gravity</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Specific_Gravity" required placeholder="e.g. 1.020">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Blood_Glucose_Random" class="form-label">Blood Glucose Random (mgs/dl)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Blood_Glucose_Random" required placeholder="e.g. 121">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Blood_Urea" class="form-label">Blood Urea (mgs/dl)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Blood_Urea" required placeholder="e.g. 36">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Serum_Creatinine" class="form-label">Serum Creatinine (mgs/dl)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Serum_Creatinine" required placeholder="e.g. 1.2">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Hemoglobin" class="form-label">Hemoglobin (gms)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Hemoglobin" required placeholder="e.g. 15.4">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Pus Cell Clumps" class="form-label">Pus Cell Clumps</label>
+                                <select class="form-control" name="Pus Cell Clumps" required>
+                                    <option value="0">Not Present</option>
+                                    <option value="1">Present</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Column 2 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Bacteria" class="form-label">Bacteria</label>
+                                <select class="form-control" name="Bacteria" required>
+                                    <option value="0">Not Present</option>
+                                    <option value="1">Present</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Hypertension" class="form-label">Hypertension</label>
+                                <select class="form-control" name="Hypertension" required>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Diabetes Mellitus" class="form-label">Diabetes Mellitus</label>
+                                <select class="form-control" name="Diabetes Mellitus" required>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Coronary Artery Disease" class="form-label">Coronary Artery Disease</label>
+                                <select class="form-control" name="Coronary Artery Disease" required>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Appetite" class="form-label">Appetite</label>
+                                <select class="form-control" name="Appetite" required>
+                                    <option value="0">Good</option>
+                                    <option value="1">Poor</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Pedal Edema" class="form-label">Pedal Edema</label>
+                                <select class="form-control" name="Pedal Edema" required>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Anemia" class="form-label">Anemia</label>
+                                <select class="form-control" name="Anemia" required>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="margin-top: 40px; text-align: right;">
+                                <button type="submit" class="btn btn-madi">Run Diagnosis <i class="fa fa-arrow-right" style="margin-left: 8px;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

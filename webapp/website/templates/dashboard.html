@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+    
+    <div class="row" style="margin-bottom: 40px;">
+        <div class="col-md-8">
+            <h2 style="color: var(--accent-primary); margin-bottom: 10px;">Diagnostic Dashboard</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">
+                Session overview of all completed screening models. Cross-reference results to identify compounding risk factors.
+            </p>
+        </div>
+        <div class="col-md-4 text-right" style="padding-top: 20px;">
+            <form action="{{ url_for('views.clear_session') }}" method="POST" style="display: inline-block;">
+                <button type="submit" class="btn btn-madi-outline" style="border-color: var(--danger); color: var(--danger); padding: 8px 16px; font-size: 0.9rem;">
+                    <i class="fa fa-trash"></i> Clear Session
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if not predictions %}
+        <div class="glass-panel text-center madi-animate" style="padding: 60px 20px;">
+            <i class="fa fa-folder-open-o" style="font-size: 60px; color: var(--text-muted); margin-bottom: 20px;"></i>
+            <h3 style="color: var(--text-muted);">No Screenings Found</h3>
+            <p style="color: var(--text-muted);">Run one or more disease prediction models to view them here.</p>
+            <br>
+            <a href="{{ url_for('views.home') }}#models" class="btn btn-madi">Explore Models</a>
+        </div>
+    {% else %}
+        <!-- Analytics Overview -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-12">
+                <div class="glass-panel madi-animate" style="padding: 30px;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 style="color: var(--text-main); margin-top: 0;"><i class="fa fa-magic" style="color: var(--accent-primary); margin-right: 10px;"></i> AI Comprehensive Analysis</h4>
+                            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0;">
+                                Combine tabular risk models and chest X-ray screening in one session, then ask the assistant to explain selected results together in patient-friendly language.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            {% if llm_available %}
+                                <button id="aggregateBtn" type="button" class="btn btn-madi btn-block">Analyze selected with AI</button>
+                            {% else %}
+                                <button type="button" class="btn btn-madi btn-block" disabled>AI Unavailable</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Aggregated Output Container -->
+                    <div id="aggregateContainer" style="display: none; margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 25px;">
+                        <div id="aggregateLoading" class="text-center">
+                            <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--accent-primary);"></i>
+                            <p style="margin-top: 10px; color: var(--text-muted);">Synthesizing comprehensive diagnostic report...</p>
+                        </div>
+                        <div id="aggregateContent" class="chat-ai" style="display: none; width: 100%; max-width: 100%; border: none; background: rgba(0,0,0,0.2);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual Results Grid -->
+        <h3 style="color: var(--text-main); margin-bottom: 25px; font-size: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">Individual Screening Records</h3>
+        <div class="row">
+            {% for pred in predictions %}
+            <div class="col-md-4 col-sm-6 madi-animate" data-delay="{{ loop.index0 * 100 }}">
+                <div class="glass-panel dashboard-card" style="padding: 20px; height: 100%;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 12px; color: var(--text-muted); font-size: 0.85rem;">
+                        <input type="checkbox" class="madi-aggregate-select" value="{{ pred.disease }}" checked>
+                        <span>Include in combined AI analysis</span>
+                    </label>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: var(--text-main);">{{ pred.display_name }}</h4>
+                        
+                        {% if pred.prediction == 1 %}
+                            <span class="status-badge status-risk"><i class="fa fa-exclamation-circle"></i> Risk</span>
+                        {% else %}
+                            <span class="status-badge status-safe"><i class="fa fa-check-circle"></i> Safe</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 15px;">
+                        <i class="fa fa-clock-o"></i> {{ pred.timestamp }}
+                    </p>
+                    
+                    {% if pred.confidence %}
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Model Confidence</span>
+                            <span style="color: var(--text-main); font-size: 0.8rem; font-weight: bold;">{{ pred.confidence }}%</span>
+                        </div>
+                        <div class="progress" style="height: 4px; background: rgba(255,255,255,0.1); margin-bottom: 0;">
+                            <div class="progress-bar" style="width: {{ pred.confidence }}%; background: {% if pred.prediction == 1 %}var(--danger){% else %}var(--success){% endif %};"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px;"><strong>Key Parameters:</strong></p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                            {% set count = 0 %}
+                            {% for key, val in pred.input_data.items() %}
+                                {% if count < 3 %}
+                                    <span style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted);">{{ key|replace('_', ' ')|title }}: {{ val }}</span>
+                                    {% set count = count + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if pred.input_data|length > 3 %}
+                                <span style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted);">+{{ pred.input_data|length - 3 }} more</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+{% if llm_available and predictions %}
+<script>
+document.getElementById('aggregateBtn').addEventListener('click', function() {
+    const selected = Array.from(document.querySelectorAll('.madi-aggregate-select:checked')).map(function(c) { return c.value; });
+    if (!selected.length) {
+        alert('Select at least one screening to include in the combined analysis.');
+        return;
+    }
+
+    document.getElementById('aggregateContainer').style.display = 'block';
+    document.getElementById('aggregateLoading').style.display = 'block';
+    document.getElementById('aggregateContent').style.display = 'none';
+    this.disabled = true;
+
+    fetch("{{ url_for('views.aggregate_analysis') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ diseases: selected })
+    })
+    .then(function(response) {
+        return response.json().then(function(data) {
+            if (!response.ok) {
+                throw new Error(data.error || 'Request failed');
+            }
+            return data;
+        });
+    })
+    .then(function(data) {
+        document.getElementById('aggregateLoading').style.display = 'none';
+        const contentDiv = document.getElementById('aggregateContent');
+
+        let formattedText = data.interpretation
+            .replace(/### (.*?)\n/g, '<h4 style="color: var(--accent-secondary); margin-top: 15px;">$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--accent-primary);">$1</strong>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n- /g, '<br>• ')
+            .replace(/\n  - /g, '<br>&nbsp;&nbsp;&nbsp;◦ ');
+
+        contentDiv.innerHTML = formattedText;
+        contentDiv.style.display = 'block';
+        document.getElementById('aggregateBtn').disabled = false;
+        document.getElementById('aggregateBtn').innerText = "Refresh analysis";
+    })
+    .catch(function() {
+        document.getElementById('aggregateLoading').style.display = 'none';
+        document.getElementById('aggregateContent').innerHTML = '<p style="color: var(--danger);">Could not generate analysis. Check your selection and API configuration, then try again.</p>';
+        document.getElementById('aggregateContent').style.display = 'block';
+        document.getElementById('aggregateBtn').disabled = false;
+    });
+});
+</script>
+{% endif %}
+
+{% endblock %}

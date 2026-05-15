@@ -1,0 +1,153 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<div class="container" style="padding-top: 50px; padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="glass-panel text-center madi-animate">
+                
+                <h2 style="color: var(--text-main); margin-bottom: 30px;">{{ display_name }} — Analysis Results</h2>
+                
+                <div class="row" style="margin-bottom: 30px;">
+                    <!-- Image Preview -->
+                    <div class="col-md-6">
+                        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; border: 1px solid var(--border-color);">
+                            <div style="position: relative; display: inline-block;">
+                                <img src="{{ url_for('prediction.send_file', filename=image_file_name) }}" 
+                                     alt="Analyzed X-Ray" 
+                                     style="max-width: 100%; max-height: 300px; border-radius: 8px;">
+                                
+                                <!-- Medical Overlay Scanning Line Effect -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-primary); box-shadow: 0 0 10px var(--accent-primary); animation: scan 3s ease-in-out infinite alternate;"></div>
+                            </div>
+                            <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.85rem; font-style: italic; word-break: break-all;">
+                                {{ image_file_name }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Result Data -->
+                    <div class="col-md-6" style="display: flex; flex-direction: column; justify-content: center;">
+                        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); height: 100%;">
+                            
+                            <h4 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">CNN Prediction</h4>
+                            
+                            {% if prediction == 0 %}
+                                <h2 style="color: var(--success); font-weight: bold; margin: 15px 0;">Normal Lungs</h2>
+                                
+                                <div style="margin-top: 20px; text-align: left;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="color: var(--text-muted); font-size: 0.85rem;">Confidence Score</span>
+                                        <span style="color: var(--success); font-weight: bold;" data-countup="{{ accuracy }}" data-suffix="%">0%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; box-shadow: none;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ accuracy }}%; background: var(--success);"></div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <h2 style="color: var(--danger); font-weight: bold; margin: 15px 0;">Pneumonia Detected</h2>
+                                
+                                <div style="margin-top: 20px; text-align: left;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="color: var(--text-muted); font-size: 0.85rem;">Confidence Score</span>
+                                        <span style="color: var(--danger); font-weight: bold;" data-countup="{{ accuracy }}" data-suffix="%">0%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; box-shadow: none;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ accuracy }}%; background: var(--danger); box-shadow: 0 0 10px var(--danger);"></div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row" style="margin-top: 30px;">
+                    <div class="col-sm-4" style="margin-bottom: 10px;">
+                        <a href="{{ url_for('views.home') }}" class="btn btn-madi-outline btn-block">Back Home</a>
+                    </div>
+                    <div class="col-sm-4" style="margin-bottom: 10px;">
+                        <a href="{{ url_for('views.dashboard') }}" class="btn btn-madi-outline btn-block" style="border-color: var(--success); color: var(--success);">
+                            <i class="fa fa-pie-chart" style="margin-right: 5px;"></i> View Dashboard
+                        </a>
+                    </div>
+                    <div class="col-sm-4" style="margin-bottom: 10px;">
+                        {% if llm_available %}
+                            <button id="interpretBtn" class="btn btn-madi btn-block">
+                                <i class="fa fa-comment-o" style="margin-right: 5px;"></i> AI Interpretation
+                            </button>
+                        {% else %}
+                            <button class="btn btn-madi btn-block" disabled title="LLM not configured">
+                                <i class="fa fa-comment-o" style="margin-right: 5px;"></i> AI Unavailable
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- AI Interpretation Container (Hidden initially) -->
+                <div id="aiContainer" style="display: none; margin-top: 30px; text-align: left; background: rgba(0, 212, 255, 0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                    <h4 style="color: var(--accent-primary);"><i class="fa fa-magic"></i> AI Diagnostic Assistant</h4>
+                    <div id="aiLoading" class="text-center" style="padding: 20px;">
+                        <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--accent-primary);"></i>
+                        <p style="margin-top: 10px; color: var(--text-muted);">Analyzing findings...</p>
+                    </div>
+                    <div id="aiContent" class="chat-ai" style="display: none; background: transparent; border: none; padding: 0;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes scan {
+        0% { top: 5%; opacity: 0.1; }
+        50% { opacity: 1; }
+        100% { top: 95%; opacity: 0.1; }
+    }
+</style>
+
+{% if llm_available %}
+<script>
+document.getElementById('interpretBtn').addEventListener('click', function() {
+    document.getElementById('aiContainer').style.display = 'block';
+    document.getElementById('aiLoading').style.display = 'block';
+    document.getElementById('aiContent').style.display = 'none';
+    this.disabled = true;
+
+    const payload = {
+        disease: "pneumonia",
+        prediction: {{ prediction }},
+        confidence: {{ accuracy }},
+        display_name: {{ display_name|tojson }},
+        input_data: { "Analysis Type": "Chest X-Ray Image", "File": "{{ image_file_name }}" }
+    };
+
+    fetch("{{ url_for('prediction.api_interpret') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('aiLoading').style.display = 'none';
+        const contentDiv = document.getElementById('aiContent');
+        let formattedText = data.interpretation
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--accent-primary);">$1</strong>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n- /g, '<br>• ');
+        contentDiv.innerHTML = formattedText;
+        contentDiv.style.display = 'block';
+        document.getElementById('interpretBtn').disabled = false;
+    })
+    .catch(error => {
+        document.getElementById('aiLoading').style.display = 'none';
+        document.getElementById('aiContent').innerHTML = '<p style="color: var(--danger);">Error generating interpretation.</p>';
+        document.getElementById('aiContent').style.display = 'block';
+        document.getElementById('interpretBtn').disabled = false;
+    });
+});
+</script>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,17 @@
+.venv/
+venv/
+**/__pycache__/
+*.py[cod]
+*.db
+.env
+webapp/.env
+webapp/website/uploads/
+webapp/instance/
+.vscode/
+**/*.log
+.DS_Store
+
+# Large trained weights (Uncomment to ignore models)
+# webapp/website/app_models/*.pkl
+# webapp/website/app_models/*.h5
+!webapp/website/app_models/.gitkeep

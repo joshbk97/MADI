@@ -1,0 +1,74 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<div class="container disease-header text-center madi-animate">
+    <h2 style="color: var(--accent-primary); font-size: 2.5rem;">Diabetes Risk Prediction</h2>
+    <p style="color: var(--text-muted);">Please provide the following clinical parameters to run the diagnostic model.</p>
+</div>
+
+<div class="container" style="padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="glass-panel madi-animate" data-delay="150">
+                <div class="madi-form-progress-text" id="formProgressText">0% Complete</div>
+                <div class="madi-form-progress"><div class="madi-form-progress-bar" id="formProgressBar"></div></div>
+                <form action="{{ url_for('prediction.predict') }}" method="POST">
+                    <input type="hidden" name="madi_model" value="diabetes">
+                    <div class="row">
+                        <!-- Column 1 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Age" class="form-label">Age</label>
+                                <input class="form-control" type="number" min="0" required name="Age" placeholder="e.g. 45">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pregnancies" class="form-label">Number of Pregnancies</label>
+                                <input class="form-control" type="number" min="0" required name="pregnancies" placeholder="e.g. 2">
+                            </div>
+                              
+                            <div class="form-group">
+                                <label for="Glucose" class="form-label">Glucose Level</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Glucose" required placeholder="e.g. 110">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="blood_pressure" class="form-label">Blood Pressure (Diastolic mm/Hg)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="blood_pressure" required placeholder="e.g. 70">
+                            </div>
+                        </div>
+
+                        <!-- Column 2 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="BSkinThickness" class="form-label">Triceps Skin Fold Thickness (mm)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="BSkinThickness" required placeholder="e.g. 20">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Insulin" class="form-label">2-Hour Serum Insulin (mu U/ml)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Insulin" required placeholder="e.g. 80">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="BMI" class="form-label">Body Mass Index (BMI)</label>
+                                <input class="form-control" type="number" min="0" step="any" name="BMI" required placeholder="e.g. 25.5">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="DiabetesPedigreeFunction" class="form-label">Diabetes Pedigree Function</label>
+                                <input class="form-control" type="number" min="0" step="any" name="DiabetesPedigreeFunction" required placeholder="e.g. 0.5">
+                            </div>
+                            
+                            <div class="form-group" style="margin-top: 40px; text-align: right;">
+                                <button type="submit" class="btn btn-madi">Run Diagnosis <i class="fa fa-arrow-right" style="margin-left: 8px;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

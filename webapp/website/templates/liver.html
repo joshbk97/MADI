@@ -1,0 +1,87 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<div class="container disease-header text-center madi-animate">
+    <h2 style="color: var(--accent-primary); font-size: 2.5rem;">Liver Disease Prediction</h2>
+    <p style="color: var(--text-muted);">Please provide the following clinical parameters to run the diagnostic model.</p>
+</div>
+
+<div class="container" style="padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="glass-panel madi-animate" data-delay="150">
+                <div class="madi-form-progress-text" id="formProgressText">0% Complete</div>
+                <div class="madi-form-progress"><div class="madi-form-progress-bar" id="formProgressBar"></div></div>
+                <form action="{{ url_for('prediction.predict') }}" method="POST">
+                    <input type="hidden" name="madi_model" value="liver">
+                    <div class="row">
+                        <!-- Column 1 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age</label>
+                                <input class="form-control" type="number" min="0" required name="age" placeholder="e.g. 45">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Gender" class="form-label">Gender</label>
+                                <select class="form-control" name="Gender" required>
+                                    <option value="0">Male</option>
+                                    <option value="1">Female</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Total_Bilirubin" class="form-label">Total Bilirubin</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Total_Bilirubin" required placeholder="e.g. 0.9">
+                            </div>
+                              
+                            <div class="form-group">
+                                <label for="Direct_Bilirubin" class="form-label">Direct Bilirubin</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Direct_Bilirubin" required placeholder="e.g. 0.2">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Alkaline_Phosphotase" class="form-label">Alkaline Phosphotase</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Alkaline_Phosphotase" required placeholder="e.g. 189">
+                            </div>
+                        </div>
+
+                        <!-- Column 2 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Alamine_Aminotransferase" class="form-label">Alamine Aminotransferase</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Alamine_Aminotransferase" required placeholder="e.g. 45">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Aspartate_Aminotransferase" class="form-label">Aspartate Aminotransferase</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Aspartate_Aminotransferase" required placeholder="e.g. 23">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Total_Protiens" class="form-label">Total Proteins</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Total_Protiens" required placeholder="e.g. 6.8">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Albumin" class="form-label">Albumin</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Albumin" required placeholder="e.g. 3.3">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="Albumin_and_Globulin_Ratio" class="form-label">Albumin and Globulin Ratio</label>
+                                <input class="form-control" type="number" min="0" step="any" name="Albumin_and_Globulin_Ratio" required placeholder="e.g. 0.9">
+                            </div>
+                            
+                            <div class="form-group" style="margin-top: 40px; text-align: right;">
+                                <button type="submit" class="btn btn-madi">Run Diagnosis <i class="fa fa-arrow-right" style="margin-left: 8px;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

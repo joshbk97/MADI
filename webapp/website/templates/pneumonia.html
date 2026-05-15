@@ -1,0 +1,67 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<div class="container disease-header text-center madi-animate">
+    <h2 style="color: var(--accent-primary); font-size: 2.5rem;">Pneumonia Image Analysis</h2>
+    <p style="color: var(--text-muted);">Upload a chest X-ray image to run the Convolutional Neural Network diagnostic model.</p>
+</div>
+
+<div class="container" style="padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="glass-panel text-center madi-animate" data-delay="150">
+                
+                {% if error %}
+                <div class="alert alert-danger" style="margin-bottom: 20px;">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form action="{{ url_for('prediction.upload_file') }}" method="POST" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('formFile').click()">
+                        <i class="fa fa-cloud-upload" style="font-size: 48px; color: var(--accent-primary); margin-bottom: 15px;"></i>
+                        <h4 style="color: var(--text-main);">Click or Drag to Upload X-Ray</h4>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Supports JPG, PNG</p>
+                        <input class="form-control" name="file" type="file" id="formFile" style="display: none;" onchange="preview_image(event)" required accept="image/*">
+                    </div>
+                    
+                    <div id="previewContainer" style="display: none; margin-top: 30px;">
+                        <div style="position: relative; display: inline-block;">
+                            <img id="output-image" src="" alt="X-Ray Preview" style="max-width: 100%; max-height: 400px; border-radius: 12px; border: 2px solid var(--accent-primary);">
+                            <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px;">
+                                <i class="fa fa-search-plus" style="color: var(--accent-primary);"></i>
+                            </div>
+                        </div>
+                        <p id="filename-display" style="color: var(--text-muted); margin-top: 10px; font-style: italic;"></p>
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <button type="submit" class="btn btn-madi btn-lg" style="padding: 15px 40px; font-size: 1.1rem;">
+                            <i class="fa fa-cogs" style="margin-right: 10px;"></i> Analyze Image
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+function preview_image(event) {
+    var reader = new FileReader();
+    reader.onload = function() {
+        var output = document.getElementById('output-image');
+        output.src = reader.result;
+        document.getElementById('previewContainer').style.display = 'block';
+        document.getElementById('uploadArea').style.display = 'none';
+        
+        var fileName = event.target.files[0].name;
+        document.getElementById('filename-display').innerText = fileName;
+    }
+    if (event.target.files[0]) {
+        reader.readAsDataURL(event.target.files[0]);
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "disease_page.html" %}
+{% block page %}
+
+<div class="container disease-header">
+    <div class="row align-items-center">
+        <div class="col-md-7 madi-animate">
+            <h2 style="color: var(--accent-primary); font-size: 3rem; margin-bottom: 20px;">Heart Disease</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.8;">
+                Heart disease describes a range of conditions that affect your heart, including blood vessel disease, heart rhythm problems, and heart defects. Many forms of heart disease can be prevented or treated with healthy lifestyle choices if detected early.
+            </p>
+            <br>
+            <a href="{{ url_for('views.heart_form') }}" class="btn btn-madi">Run Prediction Model</a>
+        </div>
+        <div class="col-md-5 text-center madi-animate" data-delay="200">
+            <img class="disease-image" src="{{ url_for('static', filename='images/disease_img/theheart1.jpg') }}" alt="Heart Illustration">
+        </div>
+    </div>
+</div>
+
+<div class="container section-padding" style="padding-top: 0;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="glass-panel" style="height: 100%;">
+                <h3 style="color: var(--text-main); margin-bottom: 20px;">Symptoms</h3>
+                <p style="color: var(--text-muted); margin-bottom: 15px;">Common heart attack signs and symptoms include:</p>
+                <ul style="color: var(--text-muted); line-height: 1.8;">
+                    <li>Pressure, tightness, pain, or a squeezing sensation in the chest</li>
+                    <li>Pain spreading to your neck, jaw or back</li>
+                    <li>Nausea, indigestion, heartburn or abdominal pain</li>
+                    <li>Shortness of breath and cold sweat</li>
+                    <li>Fatigue and lightheadedness</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="glass-panel" style="height: 100%;">
+                <h3 style="color: var(--text-main); margin-bottom: 20px;">Model Information</h3>
+                <div class="row align-items-center">
+                    <div class="col-sm-8">
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">This predictive model requires 11 clinical parameters including:</p>
+                        <ul style="color: var(--text-muted); font-size: 0.9rem;">
+                            <li>Chest Pain Type & Resting BP</li>
+                            <li>Serum Cholestoral</li>
+                            <li>Fasting Blood Sugar</li>
+                            <li>Resting ECG results</li>
+                            <li>Maximum Heart Rate Achieved</li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-4 text-center">
+                        <svg viewBox="0 0 36 36" class="circular-chart orange">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle" stroke-dasharray="90, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <text x="18" y="20.35" class="percentage">90%</text>
+                        </svg>
+                        <h5 style="color: var(--text-main); margin-top: 10px;">Accuracy</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

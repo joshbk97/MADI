@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Subpage Navigation breadcrumb logic could go here -->
+<div class="container" style="padding-top: 100px;">
+    <div class="row madi-animate">
+        <div class="col-md-12">
+            <ol class="breadcrumb" style="background: transparent; border-bottom: 1px solid var(--border-color); padding-left: 0;">
+                <li><a href="{{ url_for('views.home') }}" style="color: var(--text-muted);">Home</a></li>
+                <li class="active" style="color: var(--accent-primary);">Models</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+{% block page %}
+{% endblock %}
+
+{% endblock %}
